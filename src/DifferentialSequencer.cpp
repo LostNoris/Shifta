@@ -40,6 +40,10 @@ struct DifferentialSequencer : Module {
 		SUMCLOCK_INPUT,
 		DIFFCLOCK_INPUT,
 		PRODCLOCK_INPUT,
+
+		VALUE_CV_INPUT,
+		VALUE_CV_INPUT_LAST = VALUE_CV_INPUT + 7,
+
 		INPUTS_LEN
 	};
 
@@ -71,7 +75,7 @@ struct DifferentialSequencer : Module {
 		}
 
 		for (int i = 0; i < 4; i++) {
-		configParam(LENGTH_PARAM + i, 1.f, 8.f, 0.f, "Sequence Length");
+		configParam(LENGTH_PARAM + i, -8.f, 8.f, 0.f, "Sequence Length");
 		paramQuantities[LENGTH_PARAM + i]->snapEnabled = true;
 	    }
 
@@ -91,23 +95,50 @@ struct DifferentialSequencer : Module {
 
 		if (lerpTrigger.process(inputs[LERPCLOCK_INPUT].getVoltage())) {
 
-			int len = clamp((int)params[LENGTH_PARAM].getValue(), 1, 8);
-			Lerpstep = (Lerpstep + 1) % len;
+			int rLen = (int)params[LENGTH_PARAM].getValue();
+			if (rLen == 0) rLen = 1;
+
+			int direction = (rLen > 0) ? 1 : -1;
+			int len = std::abs(rLen);
+
+			Lerpstep = (Lerpstep + direction + len) % len;
+
 			lights[SEQ_LIGHT].setBrightness(Lerpstep / 7.f);
 		}
 		if (sumTrigger.process(inputs[SUMCLOCK_INPUT].getVoltage())) {
-			int len = clamp((int)params[LENGTH_PARAM + 1].getValue(), 1, 8);
-			Sumstep = (Sumstep + 1) % len;
+
+			int rLen = (int)params[LENGTH_PARAM + 1].getValue();
+			if (rLen == 0) rLen = 1;
+
+			int direction = (rLen > 0) ? 1 : -1;
+			int len = std::abs(rLen);
+
+			Sumstep = (Sumstep + direction + len) % len;
+
 			lights[SEQ_LIGHT + 1].setBrightness(Sumstep / 7.f);
 		}
 		if (diffTrigger.process(inputs[DIFFCLOCK_INPUT].getVoltage())) {
-			int len = clamp((int)params[LENGTH_PARAM + 2].getValue(), 1, 8);
-			Diffstep = (Diffstep + 1) % len;
+
+			int rLen = (int)params[LENGTH_PARAM + 2].getValue();
+			if (rLen == 0) rLen = 1;
+
+			int direction = (rLen > 0) ? 1 : -1;
+			int len = std::abs(rLen);
+
+			Diffstep = (Diffstep + direction + len) % len;
+
 			lights[SEQ_LIGHT + 2].setBrightness(Diffstep / 7.f);
 		}
 		if (prodTrigger.process(inputs[PRODCLOCK_INPUT].getVoltage())) {
-			int len = clamp((int)params[LENGTH_PARAM + 3].getValue(), 1, 8);
-			Prodstep = (Prodstep + 1) % len;
+
+			int rLen = (int)params[LENGTH_PARAM + 3].getValue();
+			if (rLen == 0) rLen = 1;
+
+			int direction = (rLen > 0) ? 1 : -1;
+			int len = std::abs(rLen);
+
+			Prodstep = (Prodstep + direction + len) % len;
+
 			lights[SEQ_LIGHT + 3].setBrightness(Prodstep / 7.f);
 		}
 
@@ -117,8 +148,13 @@ struct DifferentialSequencer : Module {
 		float products[8];
 		float sequenceOut[8];
 
-		for (int i = 0; i < 8; i++)
-			values[i] = params[VALUE_PARAM + i].getValue();
+		for (int i = 0; i < 8; i++) {
+			float knob = params[VALUE_PARAM + i].getValue();
+
+			float cv = inputs[VALUE_CV_INPUT + i].isConnected()	? inputs[VALUE_CV_INPUT + i].getVoltage(): 0.f;
+
+			values[i] = clamp(knob + cv, -5.f, 5.f);
+		}
 
 		for (int i = 0; i < 8; i++) {
 
@@ -167,6 +203,16 @@ struct DifferentialSequencerWidget : ModuleWidget {
 				mm2px(Vec(x, 25)),
 				module,
 				DifferentialSequencer::VALUE_PARAM + i
+			));
+		}
+
+		for (int i = 0; i < 8; i++) {
+			float x = 5.f + i * 10.f;
+
+			addInput(createInputCentered<PJ301MPort>(
+				mm2px(Vec(x, 35)),
+				module,
+				DifferentialSequencer::VALUE_CV_INPUT + i
 			));
 		}
 
