@@ -7,7 +7,7 @@ Plugin* pluginInstance;
 void init(Plugin* p) {
 	pluginInstance = p;
 
-	p->addModel(modelDifferentialSequencer);
+	p->addModel(modelShiftRegisterSequencer);
 
 
 	// Add modules here

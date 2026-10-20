@@ -6,7 +6,7 @@
 using namespace rack;
 
 // Declare the Plugin, defined in plugin.cpp
-extern Model* modelDifferentialSequencer;
+extern Model* modelShiftRegisterSequencer;
 
 
 extern Plugin* pluginInstance;

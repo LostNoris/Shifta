@@ -1,6 +1,6 @@
 {
-  "slug": "DifferentialSequencer",
-  "name": "DifferentialSequencer",
+  "slug": "ShiftRegisterSequencer",
+  "name": "ShiftRegisterSequencer",
   "version": "2.0.0",
   "license": "proprietary",
   "brand": "Sellers",
@@ -14,8 +14,8 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "DifferentialSequencer",
-      "name": "DifferentialSequencer",
+      "slug": "ShiftRegisterSequencer",
+      "name": "ShiftRegisterSequencer",
       "description": "",
       "tags": []
     }
